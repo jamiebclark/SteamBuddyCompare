@@ -1,0 +1,37 @@
+// Fonts
+$font-family-base: Helvetica, sans-serif;
+$font-family-title: $font-family-base;
+
+// Typography
+$font-size-base: 14px;
+$font-size-small: 12px;
+$font-size-large: 18px;
+$font-color: #FFF;
+$line-height-computed: 20px;
+$link-color: #FFF;
+$link-color-active: #FFF;
+$link-color-visited: #EEE;
+$link-color-hover: #FFF;
+
+
+// Spacing
+$padding-base-horizontal: 20px;
+$padding-base-vertical: $line-height-computed * .5;
+$padding-small-horizontal: $padding-base-horizontal * .75;
+$padding-small-vertical: $padding-base-vertical * .75;
+$padding-large-horizontal: $padding-base-horizontal * 2;
+$padding-large-vertical: $padding-base-vertical * 2;
+
+// Screen Size
+$screen-xs-min: 400px;
+$screen-sm-min: 600px;
+$screen-md-min: 800px;
+$screen-lg-min: 1200px;
+
+// Colors
+$color-success: green;
+$color-fail: red;
+$blue-light: #66c0f4;
+$blue-border: #095c88;
+$blue: #1a6386;
+$blue-dark: rgb(27, 40, 56);

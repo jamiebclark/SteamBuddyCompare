@@ -1,0 +1,49 @@
+html, body {
+	background-color: $blue-dark;
+	color: $font-color;
+	line-height: $line-height-computed;
+	font-family: $font-family-base;
+	font-size: $font-size-base;
+	margin: 0;
+	padding: $padding-base-vertical $padding-base-horizontal;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: $font-family-title;
+	margin: 0;
+	padding: 0;
+}
+
+a {
+	color: $link-color;
+	text-decoration: none;
+	&:hover {
+		color: $link-color-hover;
+	}
+	&:active {
+		color: $link-color-active;
+	}
+	&:visited {
+		color: $link-color-visited;
+	}
+}
+
+// Forms
+input[type="text"], button {
+	height: $line-height-computed + $padding-base-vertical * 2;
+	line-height: $line-height-computed;
+	padding-top: $padding-base-vertical;
+	padding-bottom: $padding-base-vertical;
+	padding-left: $padding-base-horizontal;
+	padding-right: $padding-base-horizontal;
+	font-size: $font-size-base;
+	vertical-align: top;
+	margin: 0;
+}
+input[type="text"] {
+	border: 1px solid #CCC;
+}
+button {
+	font-weight: bold;
+}
+

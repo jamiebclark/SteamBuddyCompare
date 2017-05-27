@@ -1,0 +1,22 @@
+.TagList {
+	&Item {
+		padding: $padding-small-vertical $padding-small-horizontal;
+		background-color: $blue;
+		color: #FFF;
+		border-radius: 2px;
+		margin: 2px;
+		text-decoration: none;
+		display: inline-block;
+		font-size: $font-size-small;
+
+		&:hover {
+			background-color: #CCC;
+		}
+		&-match {
+			background-color: $color-success;
+		}
+		&-hide {
+			background-color: $color-fail;
+		}
+	}
+}

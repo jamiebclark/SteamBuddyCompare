@@ -1,0 +1,13 @@
+@import "steambuddy";
+@import "taglist";
+
+.content-box {
+	margin: 0 auto $line-height-computed auto;
+	background-color: $blue-dark;
+	padding: $padding-large-vertical $padding-large-horizontal;
+	font-size: $font-size-large;
+	border: $blue-border;
+	border-radius: $line-height-computed;
+	min-height: $line-height-computed * 15;
+	max-width: $screen-md-min;
+}
