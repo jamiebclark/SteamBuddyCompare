@@ -118,3 +118,23 @@ $cell-padding-horizontal: $padding-base-horizontal;
 		}
 	}
 }
+
+.SteamBuddyCompare-friends {
+	.steam-friend {
+		display: inline-block;
+		padding: $padding-small-vertical $padding-small-horizontal;
+		font-size: $font-size-small;
+		text-decoration: none;
+		background-color: $blue-light;
+		font-weight: normal;
+		border-radius: 4px;
+		margin-right: 5px;
+		&-add, &-delete {
+			display: inline-block;
+		}
+		&-delete {
+			margin-left: 5px;
+			font-size: $font-size-base;
+		}
+	}
+}

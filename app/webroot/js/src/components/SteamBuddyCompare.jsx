@@ -2,6 +2,11 @@ import React, {Component} from "react";
 import TagList from "./TagList.jsx";
 import fetch from "node-fetch";
 import classNames from "classnames";
+import _ from "lodash";
+
+function cloneArray(arr) {
+	return JSON.parse(JSON.stringify(arr));
+}
 
 export default class SteamBuddyCompare extends Component {
 	constructor(props) {
@@ -10,33 +15,58 @@ export default class SteamBuddyCompare extends Component {
 			data: {},
 			loading: false,
 			filters: {},
-			buddies: []
+			buddies: [],
+			friends: [],
 		};
-
-		/*
-		if (props.steamIds) {
-			if (typeof props.steamIds === "string") {
-				this.state.steamIds = props.steamIds.split(',');
-			} else {
-				this.state.steamIds = props.steamIds;
-			}
-		}
-		*/
 	}
 
 	static get defaultProps() {
 		return {
-			baseUrl: ""
+			baseUrl: "",
+			steamIds: []
 		};
 	}
 
 	componentDidMount() {
-		let localBuddies = this.getLocal("buddies");
-		if (localBuddies) {
-			this.setState({buddies: localBuddies});
+		if (this.props.steamIds) {
+			let buddies = [], steamIds = this.props.steamIds;
+			if (typeof steamIds === "string") {
+				steamIds = steamIds.split(',');
+			} 
+			for (let i in steamIds) {
+				buddies.push({id: steamIds[i]});
+			}
+			this.setState({buddies: buddies});
+		} else {
+			let localBuddies = this.getLocal("buddies");
+			if (localBuddies) {
+				this.setState({buddies: localBuddies});
+			}
+		}
+
+		let localFriends = this.getLocal("friends"), friends = [];
+		if (localFriends) {
+			for (let i in localFriends) {
+				if (localFriends[i] != null) {
+					friends.push(localFriends[i]);
+				}
+			}
+			this.setState({friends: friends});
 		}
 	}
 
+
+
+	componentDidUpdate(prevProps, prevState) {
+		if (!_.isEqual(prevState.buddies, this.state.buddies)) {
+			console.log(["STORING BUDDIES"]);
+			this.setLocal("buddies", this.state.buddies);
+		}
+		if (!_.isEqual(prevState.friends, this.state.friends)) {
+			console.log(["STORING FRIENDS"]);
+			this.setLocal("friends", this.state.friends);
+		}
+	}
 	hasFilter(propName) {
 		return this.state.filters[propName] && this.state.filters[propName][1];
 	}
@@ -110,9 +140,7 @@ export default class SteamBuddyCompare extends Component {
 
 	handleInputIdChange(i, e) {
 		let val = e.target.value.replace(/[^0-9]/, '');
-		if (val != "") {
-			this.setBuddy(i, {id: val});
-		}
+		this.setBuddy(i, {id: val});
 	}
 	
 	handleInputNameChange(i, e) {
@@ -121,22 +149,49 @@ export default class SteamBuddyCompare extends Component {
 	}
 
 	handleInputDelete(i, e) {
-		let buddies = this.state.buddies;
-		delete buddies[i];
-		this.setState({buddies: buddies});
+		let buddies = this.state.buddies, newBuddies = [];
+		for (let j in buddies) {
+			if (j != i) {
+				newBuddies.push(buddies[j]);
+			}
+		}
+		this.setState({buddies: newBuddies});
 	}
 
 	setBuddy(index, vals) {
-		let buddies = this.state.buddies;
+		let buddies = cloneArray(this.state.buddies);
 		if (typeof buddies[index] === "undefined") {
 			buddies[index] = {id: "", name: ""};
 		}
 		for (let i in vals) {
 			buddies[index][i] = vals[i];
 		}
-		this.setState({buddies: buddies}, () => {
-			this.setLocal("buddies", buddies);
-		});
+		this.setState({buddies: buddies});
+	}
+
+	setFriend(id, name) {
+		let friends = cloneArray(this.state.friends), i;
+		for (i in friends) {
+			if (id == friends[i].id) {
+				return null;
+			}
+		}
+		friends.push({id: id, name: name});
+		this.setState({friends: friends});
+	}
+
+	isFriend(id) {
+		for (let i in this.state.friends) {
+			if (
+				(typeof this.state.friends[i] == "object") && 
+				(this.state.friends[i] !== null) && 
+				(typeof this.state.friends[i].id !== "undefined") && 
+				(this.state.friends[i].id == id)
+			) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	handleSubmit(e) {
@@ -147,6 +202,41 @@ export default class SteamBuddyCompare extends Component {
 	handleAddInputClick(e) {
 		e.preventDefault();
 		this.setBuddy(this.state.buddies.length, {});
+	}
+
+	handleSaveFriend(i, e) {
+		let buddy = this.state.buddies[i];
+		this.setFriend(buddy.id, buddy.name);
+	}
+
+	handleAddFriend(i, e) {
+		let buddies = this.state.buddies,
+			friends = this.state.friends;
+		if (typeof friends[i] == "undefined" || friends[i] == null) {
+			return null;
+		}
+
+		for (let j in buddies) {
+			if (
+				(typeof buddies[j] !== "undefined") &&
+				(buddies[j] !== null) && 
+				(typeof buddies[j].id !== "undefined") && 
+				(buddies[j].id == friends[i].id)
+			) {
+				return null;
+			}
+		}
+		this.setBuddy(buddies.length, friends[i]);
+	}
+
+	handleDeleteFriend(i, e) {
+		let friends = cloneArray(this.state.friends), newFriends = [];
+		for (let j in friends) {
+			if (j != i) {
+				newFriends.push(friends[j]);
+			}
+		}
+		this.setState({friends: newFriends});
 	}
 
 	setLocal(name, val) {
@@ -170,14 +260,16 @@ export default class SteamBuddyCompare extends Component {
 
 	renderForm() {
 		var inputs = [],
-			total = this.state.buddies.length + 1;
+			total = this.state.buddies.length;
+		if (total < 2) {
+			total = 2;
+		}
 		for (let i = 0; i < total; i++) {
 			var buddy = {id: "", name: ""};
 			if (typeof this.state.buddies[i] !== "undefined" && this.state.buddies[i]) {
 				buddy = this.state.buddies[i];
 			}
-			console.log(["BUDDY", buddy]);
-
+			let friendClass = classNames("input-friend", {"input-friend-active": this.isFriend(buddy.id)});
 			inputs.push(<div key={i} className="input-group">
 				<input
 					type="text"
@@ -194,6 +286,12 @@ export default class SteamBuddyCompare extends Component {
 					onChange={this.handleInputNameChange.bind(this, i)}
 					value={buddy.name}
 					placeholder={"Player " + (i+1)}
+				/>
+				<button
+					tabIndex="-1"
+					type="button"
+					className={friendClass}
+					onClick={this.handleSaveFriend.bind(this, i)}
 				/>
 				<button
 					tabIndex="-1"
@@ -331,6 +429,28 @@ export default class SteamBuddyCompare extends Component {
 		</div>
 	}
 
+	renderFriends() {
+		let friends = [];
+		console.log(this.state.friends);
+		for (let i in this.state.friends) {
+			friends.push(<div key={i} className="steam-friend">
+				<a href="#"
+					className="steam-friend-add"
+					onClick={this.handleAddFriend.bind(this, i)}
+					title={"Add " + this.state.friends[i].name + " to the Search"}
+				>
+					{this.state.friends[i].id}:{this.state.friends[i].name}
+				</a>
+				<a href="#"
+					className="steam-friend-delete"
+					onClick={this.handleDeleteFriend.bind(this, i)}
+				>&times;</a>
+			</div>
+		);
+		}
+		return <div className="SteamBuddyCompare-friends">{friends}</div>
+	}
+
 	renderLoading() {
 		return <div className="SteamBuddyCompare-loading content-box">
 			<div className="steam">
@@ -370,6 +490,7 @@ export default class SteamBuddyCompare extends Component {
 				<div className="SteamBuddyCompare-form">
 					{this.renderForm()}
 				</div>
+				{this.renderFriends()}
 			</header>
 			<div className="SteamBuddyCompare-results">
 				{body}
