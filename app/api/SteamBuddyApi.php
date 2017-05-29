@@ -118,8 +118,8 @@ class Api {
 				unset($steamIds[$k]);
 			}
 		}
-		
-		if (!empty($steamIds)) {
+
+		if (empty($steamIds)) {
 			return null;
 		}
 
