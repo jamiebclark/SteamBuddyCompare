@@ -7,28 +7,34 @@ export default class SteamBuddyCompare extends Component {
 	constructor(props) {
 		super(...arguments);
 		this.state = {
-			steamIds: [],
 			data: {},
-			idCount: 2,
 			loading: false,
-			filters: {}
+			filters: {},
+			buddies: []
 		};
 
+		/*
 		if (props.steamIds) {
 			if (typeof props.steamIds === "string") {
 				this.state.steamIds = props.steamIds.split(',');
 			} else {
 				this.state.steamIds = props.steamIds;
 			}
-			this.state.idCount = this.state.steamIds.length;
 		}
+		*/
 	}
 
 	static get defaultProps() {
 		return {
-			baseUrl: "",
-			steamIds: []
+			baseUrl: ""
 		};
+	}
+
+	componentDidMount() {
+		let localBuddies = this.getLocal("buddies");
+		if (localBuddies) {
+			this.setState({buddies: localBuddies});
+		}
 	}
 
 	hasFilter(propName) {
@@ -59,8 +65,8 @@ export default class SteamBuddyCompare extends Component {
 
 	setData() {
 		var url = this.props.baseUrl + "api?";
-		for (let i in this.state.steamIds) {
-			url += "steamId[" + i + "]=" + this.state.steamIds[i] + "&";
+		for (let i in this.state.buddies) {
+			url += "steamId[" + i + "]=" + this.state.buddies[i].id + "&";
 		}
 		this.setState({loading: true}, () => {
 			console.log(["FETCHING", url]);
@@ -102,13 +108,35 @@ export default class SteamBuddyCompare extends Component {
 		this.setState({filters: filters});
 	}
 
-	handleInputChange(i, e) {
-		let steamIds = this.state.steamIds,
-			val = e.target.value.replace(/[^0-9]/, '');
+	handleInputIdChange(i, e) {
+		let val = e.target.value.replace(/[^0-9]/, '');
 		if (val != "") {
-			steamIds[i] = val;
-			this.setState({steamIds: steamIds});
+			this.setBuddy(i, {id: val});
 		}
+	}
+	
+	handleInputNameChange(i, e) {
+		let val = e.target.value.replace(/[^\sa-zA-Z0-9]/, '');
+		this.setBuddy(i, {name: val});
+	}
+
+	handleInputDelete(i, e) {
+		let buddies = this.state.buddies;
+		delete buddies[i];
+		this.setState({buddies: buddies});
+	}
+
+	setBuddy(index, vals) {
+		let buddies = this.state.buddies;
+		if (typeof buddies[index] === "undefined") {
+			buddies[index] = {id: "", name: ""};
+		}
+		for (let i in vals) {
+			buddies[index][i] = vals[i];
+		}
+		this.setState({buddies: buddies}, () => {
+			this.setLocal("buddies", buddies);
+		});
 	}
 
 	handleSubmit(e) {
@@ -118,21 +146,62 @@ export default class SteamBuddyCompare extends Component {
 
 	handleAddInputClick(e) {
 		e.preventDefault();
-		this.setState({
-			idCount: this.state.idCount + 1
-		});
+		this.setBuddy(this.state.buddies.length, {});
+	}
+
+	setLocal(name, val) {
+		if (this.hasLocal()) {
+			localStorage.setItem(name, JSON.stringify(val));
+		} else {
+			console.log("NO LOCAL STORAGE");
+		}
+	}
+
+	getLocal(name) {
+		if (this.hasLocal() && typeof localStorage[name] !== "undefined") {
+			return JSON.parse(localStorage[name]);
+		}
+		return null;
+	}
+
+	hasLocal() {
+		return typeof(Storage !== "undefined");
 	}
 
 	renderForm() {
-		var inputs = [];
-		for (let i = 0; i < this.state.idCount; i++) {
-			inputs.push(<input
-				key={i}
-				type="text"
-				name="steamId[]"
-				onChange={this.handleInputChange.bind(this, i)}
-				value={this.state.steamIds[i]}
-			/>)
+		var inputs = [],
+			total = this.state.buddies.length + 1;
+		for (let i = 0; i < total; i++) {
+			var buddy = {id: "", name: ""};
+			if (typeof this.state.buddies[i] !== "undefined" && this.state.buddies[i]) {
+				buddy = this.state.buddies[i];
+			}
+			console.log(["BUDDY", buddy]);
+
+			inputs.push(<div key={i} className="input-group">
+				<input
+					type="text"
+					className="input-id"
+					name={"steamId[" + i + "]"}
+					onChange={this.handleInputIdChange.bind(this, i)}
+					value={buddy.id}
+					placeholder={"STEAM ID"}
+				/>
+				<input
+					type="text"
+					className="input-name"
+					name={"steamName[" + i + "]"}
+					onChange={this.handleInputNameChange.bind(this, i)}
+					value={buddy.name}
+					placeholder={"Player " + (i+1)}
+				/>
+				<button
+					tabIndex="-1"
+					type="button" 
+					className="input-delete"
+					onClick={this.handleInputDelete.bind(this, i)}
+				>&times;</button>
+			</div>);
 		}
 		inputs.push(<button 
 			key="plus"
@@ -159,13 +228,18 @@ export default class SteamBuddyCompare extends Component {
 			cols = [],
 			c = 0,
 			r = 0,
-			game;
+			game,
+			playerName;
 
-		for (c in this.state.steamIds) {
-			if (this.state.steamIds[c] != "") {
+		for (c in this.state.buddies) {
+			if (this.state.buddies[c].id != "") {
+				playerName = "Player " + (c+1);
+				if (this.state.buddies[c].name) {
+					playerName = this.state.buddies[c].name;
+				}
 				headers.push(<th key={c}>
 					<a 
-						href={"http://steamcommunity.com/profiles/" + this.state.steamIds[c]}
+						href={"http://steamcommunity.com/profiles/" + this.state.buddies[c].id}
 						target="_blank"
 					>{"Player " + c}</a>
 				</th>);
@@ -200,9 +274,9 @@ export default class SteamBuddyCompare extends Component {
 				continue;
 			}
 
-			for (c in this.state.steamIds) {
-				if (this.state.steamIds[c] != "") {
-					let isMatch = game.steamBuddy.steamIds.indexOf(this.state.steamIds[c]) != -1,
+			for (c in this.state.buddies) {
+				if (this.state.buddies[c].id != "") {
+					let isMatch = game.steamBuddy.steamIds.indexOf(this.state.buddies[c].id) != -1,
 						cellClass = isMatch ? "cellmatch-yes" : "cellmatch-no",
 						cellContent = isMatch ? "YES" : "NO";
 					cols.push(<td key={c}>

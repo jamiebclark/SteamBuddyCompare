@@ -18,7 +18,7 @@ a {
 	color: $link-color;
 	text-decoration: none;
 	font-weight: bold;
-	
+
 	&:hover {
 		color: $link-color-hover;
 	}
@@ -36,8 +36,8 @@ input[type="text"], button {
 	line-height: $line-height-computed;
 	padding-top: $padding-base-vertical;
 	padding-bottom: $padding-base-vertical;
-	padding-left: $padding-base-horizontal;
-	padding-right: $padding-base-horizontal;
+	padding-left: $padding-base-vertical;
+	padding-right: $padding-base-vertical;
 	font-size: $font-size-base;
 	vertical-align: top;
 	margin: 0;
@@ -45,6 +45,24 @@ input[type="text"], button {
 input[type="text"] {
 	border: 1px solid #CCC;
 }
+.input-list {
+	> .input-group {
+		display: inline-block;
+	}
+}
+.input-group {
+	border-radius: 8px;
+	margin-right: 5px;
+}
+.input-id {
+	font-size: $font-size-small;
+	font-family: Courier, fixed;
+	width: 100px;
+}
+.input-name {
+	width: 80px;
+}
+
 button {
 	font-weight: bold;
 }

@@ -29,6 +29,8 @@ Object.defineProperty(exports, "__esModule", {
 	value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = require("react");
@@ -64,25 +66,33 @@ var SteamBuddyCompare = function (_Component) {
 		var _this = _possibleConstructorReturn(this, (SteamBuddyCompare.__proto__ || Object.getPrototypeOf(SteamBuddyCompare)).apply(this, arguments));
 
 		_this.state = {
-			steamIds: [],
 			data: {},
-			idCount: 2,
 			loading: false,
-			filters: {}
+			filters: {},
+			buddies: []
 		};
 
-		if (props.steamIds) {
-			if (typeof props.steamIds === "string") {
-				_this.state.steamIds = props.steamIds.split(',');
-			} else {
-				_this.state.steamIds = props.steamIds;
-			}
-			_this.state.idCount = _this.state.steamIds.length;
-		}
+		/*
+  if (props.steamIds) {
+  	if (typeof props.steamIds === "string") {
+  		this.state.steamIds = props.steamIds.split(',');
+  	} else {
+  		this.state.steamIds = props.steamIds;
+  	}
+  }
+  */
 		return _this;
 	}
 
 	_createClass(SteamBuddyCompare, [{
+		key: "componentDidMount",
+		value: function componentDidMount() {
+			var localBuddies = this.getLocal("buddies");
+			if (localBuddies) {
+				this.setState({ buddies: localBuddies });
+			}
+		}
+	}, {
 		key: "hasFilter",
 		value: function hasFilter(propName) {
 			return this.state.filters[propName] && this.state.filters[propName][1];
@@ -118,8 +128,8 @@ var SteamBuddyCompare = function (_Component) {
 			var _this2 = this;
 
 			var url = this.props.baseUrl + "api?";
-			for (var i in this.state.steamIds) {
-				url += "steamId[" + i + "]=" + this.state.steamIds[i] + "&";
+			for (var i in this.state.buddies) {
+				url += "steamId[" + i + "]=" + this.state.buddies[i].id + "&";
 			}
 			this.setState({ loading: true }, function () {
 				console.log(["FETCHING", url]);
@@ -161,14 +171,41 @@ var SteamBuddyCompare = function (_Component) {
 			this.setState({ filters: filters });
 		}
 	}, {
-		key: "handleInputChange",
-		value: function handleInputChange(i, e) {
-			var steamIds = this.state.steamIds,
-			    val = e.target.value.replace(/[^0-9]/, '');
+		key: "handleInputIdChange",
+		value: function handleInputIdChange(i, e) {
+			var val = e.target.value.replace(/[^0-9]/, '');
 			if (val != "") {
-				steamIds[i] = val;
-				this.setState({ steamIds: steamIds });
+				this.setBuddy(i, { id: val });
 			}
+		}
+	}, {
+		key: "handleInputNameChange",
+		value: function handleInputNameChange(i, e) {
+			var val = e.target.value.replace(/[^\sa-zA-Z0-9]/, '');
+			this.setBuddy(i, { name: val });
+		}
+	}, {
+		key: "handleInputDelete",
+		value: function handleInputDelete(i, e) {
+			var buddies = this.state.buddies;
+			delete buddies[i];
+			this.setState({ buddies: buddies });
+		}
+	}, {
+		key: "setBuddy",
+		value: function setBuddy(index, vals) {
+			var _this3 = this;
+
+			var buddies = this.state.buddies;
+			if (typeof buddies[index] === "undefined") {
+				buddies[index] = { id: "", name: "" };
+			}
+			for (var i in vals) {
+				buddies[index][i] = vals[i];
+			}
+			this.setState({ buddies: buddies }, function () {
+				_this3.setLocal("buddies", buddies);
+			});
 		}
 	}, {
 		key: "handleSubmit",
@@ -180,22 +217,72 @@ var SteamBuddyCompare = function (_Component) {
 		key: "handleAddInputClick",
 		value: function handleAddInputClick(e) {
 			e.preventDefault();
-			this.setState({
-				idCount: this.state.idCount + 1
-			});
+			this.setBuddy(this.state.buddies.length, {});
+		}
+	}, {
+		key: "setLocal",
+		value: function setLocal(name, val) {
+			if (this.hasLocal()) {
+				localStorage.setItem(name, JSON.stringify(val));
+			} else {
+				console.log("NO LOCAL STORAGE");
+			}
+		}
+	}, {
+		key: "getLocal",
+		value: function getLocal(name) {
+			if (this.hasLocal() && typeof localStorage[name] !== "undefined") {
+				return JSON.parse(localStorage[name]);
+			}
+			return null;
+		}
+	}, {
+		key: "hasLocal",
+		value: function hasLocal() {
+			return _typeof(Storage !== "undefined");
 		}
 	}, {
 		key: "renderForm",
 		value: function renderForm() {
-			var inputs = [];
-			for (var i = 0; i < this.state.idCount; i++) {
-				inputs.push(_react2.default.createElement("input", {
-					key: i,
-					type: "text",
-					name: "steamId[]",
-					onChange: this.handleInputChange.bind(this, i),
-					value: this.state.steamIds[i]
-				}));
+			var inputs = [],
+			    total = this.state.buddies.length + 1;
+			for (var i = 0; i < total; i++) {
+				var buddy = { id: "", name: "" };
+				if (typeof this.state.buddies[i] !== "undefined" && this.state.buddies[i]) {
+					buddy = this.state.buddies[i];
+				}
+				console.log(["BUDDY", buddy]);
+
+				inputs.push(_react2.default.createElement(
+					"div",
+					{ key: i, className: "input-group" },
+					_react2.default.createElement("input", {
+						type: "text",
+						className: "input-id",
+						name: "steamId[" + i + "]",
+						onChange: this.handleInputIdChange.bind(this, i),
+						value: buddy.id,
+						placeholder: "STEAM ID"
+					}),
+					_react2.default.createElement("input", {
+						type: "text",
+						className: "input-name",
+						name: "steamName[" + i + "]",
+						onChange: this.handleInputNameChange.bind(this, i),
+						value: buddy.name,
+						placeholder: "Player " + (i + 1)
+					}),
+					_react2.default.createElement(
+						"button",
+						{
+							tabIndex: "-1",
+							type: "button",
+							className: "input-delete",
+							onClick: this.handleInputDelete.bind(this, i)
+						},
+						"\xD7"
+					)
+				));
 			}
 			inputs.push(_react2.default.createElement(
 				"button",
@@ -243,17 +330,22 @@ var SteamBuddyCompare = function (_Component) {
 			    cols = [],
 			    c = 0,
 			    r = 0,
-			    game = void 0;
+			    game = void 0,
+			    playerName = void 0;
 
-			for (c in this.state.steamIds) {
-				if (this.state.steamIds[c] != "") {
+			for (c in this.state.buddies) {
+				if (this.state.buddies[c].id != "") {
+					playerName = "Player " + (c + 1);
+					if (this.state.buddies[c].name) {
+						playerName = this.state.buddies[c].name;
+					}
 					headers.push(_react2.default.createElement(
 						"th",
 						{ key: c },
 						_react2.default.createElement(
 							"a",
 							{
-								href: "http://steamcommunity.com/profiles/" + this.state.steamIds[c],
+								href: "http://steamcommunity.com/profiles/" + this.state.buddies[c].id,
 								target: "_blank"
 							},
 							"Player " + c
@@ -285,9 +377,9 @@ var SteamBuddyCompare = function (_Component) {
 					continue;
 				}
 
-				for (c in this.state.steamIds) {
-					if (this.state.steamIds[c] != "") {
-						var isMatch = game.steamBuddy.steamIds.indexOf(this.state.steamIds[c]) != -1,
+				for (c in this.state.buddies) {
+					if (this.state.buddies[c].id != "") {
+						var isMatch = game.steamBuddy.steamIds.indexOf(this.state.buddies[c].id) != -1,
 						    cellClass = isMatch ? "cellmatch-yes" : "cellmatch-no",
 						    cellContent = isMatch ? "YES" : "NO";
 						cols.push(_react2.default.createElement(
@@ -468,8 +560,7 @@ var SteamBuddyCompare = function (_Component) {
 		key: "defaultProps",
 		get: function get() {
 			return {
-				baseUrl: "",
-				steamIds: []
+				baseUrl: ""
 			};
 		}
 	}]);
