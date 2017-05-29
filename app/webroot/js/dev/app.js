@@ -118,11 +118,9 @@ var SteamBuddyCompare = function (_Component) {
 		key: "componentDidUpdate",
 		value: function componentDidUpdate(prevProps, prevState) {
 			if (!_lodash2.default.isEqual(prevState.buddies, this.state.buddies)) {
-				console.log(["STORING BUDDIES"]);
 				this.setLocal("buddies", this.state.buddies);
 			}
 			if (!_lodash2.default.isEqual(prevState.friends, this.state.friends)) {
-				console.log(["STORING FRIENDS"]);
 				this.setLocal("friends", this.state.friends);
 			}
 		}
@@ -166,7 +164,7 @@ var SteamBuddyCompare = function (_Component) {
 				url += "steamId[" + i + "]=" + this.state.buddies[i].id + "&";
 			}
 			this.setState({ loading: true }, function () {
-				console.log(["FETCHING", url]);
+				//console.log(["FETCHING", url]);
 				(0, _nodeFetch2.default)(url).then(function (response) {
 					return response.json();
 				}).then(function (data) {
@@ -560,7 +558,6 @@ var SteamBuddyCompare = function (_Component) {
 		key: "renderFriends",
 		value: function renderFriends() {
 			var friends = [];
-			console.log(this.state.friends);
 			for (var i in this.state.friends) {
 				friends.push(_react2.default.createElement(
 					"div",

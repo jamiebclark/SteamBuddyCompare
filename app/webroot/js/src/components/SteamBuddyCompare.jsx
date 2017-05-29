@@ -59,11 +59,9 @@ export default class SteamBuddyCompare extends Component {
 
 	componentDidUpdate(prevProps, prevState) {
 		if (!_.isEqual(prevState.buddies, this.state.buddies)) {
-			console.log(["STORING BUDDIES"]);
 			this.setLocal("buddies", this.state.buddies);
 		}
 		if (!_.isEqual(prevState.friends, this.state.friends)) {
-			console.log(["STORING FRIENDS"]);
 			this.setLocal("friends", this.state.friends);
 		}
 	}
@@ -99,7 +97,7 @@ export default class SteamBuddyCompare extends Component {
 			url += "steamId[" + i + "]=" + this.state.buddies[i].id + "&";
 		}
 		this.setState({loading: true}, () => {
-			console.log(["FETCHING", url]);
+			//console.log(["FETCHING", url]);
 			fetch(url)
 				.then((response) => {
 					return response.json();
@@ -431,7 +429,6 @@ export default class SteamBuddyCompare extends Component {
 
 	renderFriends() {
 		let friends = [];
-		console.log(this.state.friends);
 		for (let i in this.state.friends) {
 			friends.push(<div key={i} className="steam-friend">
 				<a href="#"
