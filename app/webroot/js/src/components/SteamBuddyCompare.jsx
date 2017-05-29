@@ -341,7 +341,7 @@ export default class SteamBuddyCompare extends Component {
 					<a 
 						href={"http://steamcommunity.com/profiles/" + this.state.buddies[c].id}
 						target="_blank"
-					>{"Player " + c}</a>
+					>{playerName}</a>
 				</th>);
 			}
 		}

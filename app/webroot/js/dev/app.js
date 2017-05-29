@@ -451,7 +451,7 @@ var SteamBuddyCompare = function (_Component) {
 								href: "http://steamcommunity.com/profiles/" + this.state.buddies[c].id,
 								target: "_blank"
 							},
-							"Player " + c
+							playerName
 						)
 					));
 				}
