@@ -108,11 +108,24 @@ class Api {
  * Stores all apps inside an app cache
  *
  **/
-	public function get($steamId) {
+	public function get($steamIds) {
 		set_time_limit(720);
-		$result = $this->_get($steamId, [], 1);
-		if (is_array($steamId)) {
-			$steamIdCount = count($steamId);
+		if (!is_array($steamIds)) {
+			$steamIds = [$steamIds];
+		}
+		foreach ($steamIds as $k => $id) {
+			if (!is_numeric($id)) {
+				unset($steamIds[$k]);
+			}
+		}
+		
+		if (!empty($steamIds)) {
+			return null;
+		}
+
+		$result = $this->_get($steamIds, [], 1);
+		if (is_array($steamIds)) {
+			$steamIdCount = count($steamIds);
 			foreach ($result['games'] as $k => $game) {
 				$result['games'][$k]['steamBuddy']['percent'] = $game['steamBuddy']['matches'] / $steamIdCount;
 			}
