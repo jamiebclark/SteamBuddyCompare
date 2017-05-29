@@ -204,7 +204,9 @@ export default class SteamBuddyCompare extends Component {
 
 	handleSaveFriend(i, e) {
 		let buddy = this.state.buddies[i];
-		this.setFriend(buddy.id, buddy.name);
+		if (buddy.id != "") {
+			this.setFriend(buddy.id, buddy.name);
+		}
 	}
 
 	handleAddFriend(i, e) {
@@ -290,13 +292,15 @@ export default class SteamBuddyCompare extends Component {
 					type="button"
 					className={friendClass}
 					onClick={this.handleSaveFriend.bind(this, i)}
-				/>
+				>
+					<i className="fa fa-bookmark" />
+				</button>
 				<button
 					tabIndex="-1"
 					type="button" 
 					className="input-delete"
 					onClick={this.handleInputDelete.bind(this, i)}
-				>&times;</button>
+				><i className="fa fa-times" /></button>
 			</div>);
 		}
 		inputs.push(<button 
@@ -313,7 +317,7 @@ export default class SteamBuddyCompare extends Component {
 				{inputs}
 			</div>
 			<div className="search">
-				<button type="submit">Submit</button>
+				<button type="submit"><i className="fa fa-search" /> Search</button>
 			</div>
 		</form>
 	}
@@ -436,12 +440,14 @@ export default class SteamBuddyCompare extends Component {
 					onClick={this.handleAddFriend.bind(this, i)}
 					title={"Add " + this.state.friends[i].name + " to the Search"}
 				>
-					{this.state.friends[i].id}:{this.state.friends[i].name}
+					<i className="fa fa-bookmark" /> 
+					 {this.state.friends[i].id}:{this.state.friends[i].name}
 				</a>
 				<a href="#"
 					className="steam-friend-delete"
 					onClick={this.handleDeleteFriend.bind(this, i)}
-				>&times;</a>
+					title="Remove this friend from your bookmarks"
+				><i className="fa fa-times" /></a>
 			</div>
 		);
 		}

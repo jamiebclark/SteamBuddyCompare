@@ -59,6 +59,7 @@ if (empty($defaultSteamIds) && defined('DEFAULT_STEAM_IDS')) {
 	<head>
 		<title>Steam Buddy Compare</title>
 		<link rel="stylesheet" href="css/style.css" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
 	</head>
 	<body>
 		<div id="root" data-base="<?= $baseUrl ?>" data-steamids="<?= $defaultSteamIds ?>"></div>

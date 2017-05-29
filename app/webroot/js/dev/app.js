@@ -277,7 +277,9 @@ var SteamBuddyCompare = function (_Component) {
 		key: "handleSaveFriend",
 		value: function handleSaveFriend(i, e) {
 			var buddy = this.state.buddies[i];
-			this.setFriend(buddy.id, buddy.name);
+			if (buddy.id != "") {
+				this.setFriend(buddy.id, buddy.name);
+			}
 		}
 	}, {
 		key: "handleAddFriend",
@@ -362,12 +364,16 @@ var SteamBuddyCompare = function (_Component) {
 						value: buddy.name,
 						placeholder: "Player " + (i + 1)
 					}),
-					_react2.default.createElement("button", {
-						tabIndex: "-1",
-						type: "button",
-						className: friendClass,
-						onClick: this.handleSaveFriend.bind(this, i)
-					}),
+					_react2.default.createElement(
+						"button",
+						{
+							tabIndex: "-1",
+							type: "button",
+							className: friendClass,
+							onClick: this.handleSaveFriend.bind(this, i)
+						},
+						_react2.default.createElement("i", { className: "fa fa-bookmark" })
+					),
 					_react2.default.createElement(
 						"button",
 						{
@@ -376,7 +382,7 @@ var SteamBuddyCompare = function (_Component) {
 							className: "input-delete",
 							onClick: this.handleInputDelete.bind(this, i)
 						},
-						"\xD7"
+						_react2.default.createElement("i", { className: "fa fa-times" })
 					)
 				));
 			}
@@ -413,7 +419,8 @@ var SteamBuddyCompare = function (_Component) {
 					_react2.default.createElement(
 						"button",
 						{ type: "submit" },
-						"Submit"
+						_react2.default.createElement("i", { className: "fa fa-search" }),
+						" Search"
 					)
 				)
 			);
@@ -569,6 +576,7 @@ var SteamBuddyCompare = function (_Component) {
 							onClick: this.handleAddFriend.bind(this, i),
 							title: "Add " + this.state.friends[i].name + " to the Search"
 						},
+						_react2.default.createElement("i", { className: "fa fa-bookmark" }),
 						this.state.friends[i].id,
 						":",
 						this.state.friends[i].name
@@ -577,9 +585,10 @@ var SteamBuddyCompare = function (_Component) {
 						"a",
 						{ href: "#",
 							className: "steam-friend-delete",
-							onClick: this.handleDeleteFriend.bind(this, i)
+							onClick: this.handleDeleteFriend.bind(this, i),
+							title: "Remove this friend from your bookmarks"
 						},
-						"\xD7"
+						_react2.default.createElement("i", { className: "fa fa-times" })
 					)
 				));
 			}

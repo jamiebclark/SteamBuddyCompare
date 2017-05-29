@@ -264,6 +264,14 @@ $pivot-3-y: $steam-canvas-size * .33;
 	}
 }
 
+@keyframes fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
 
 .steam {
 	background-color: $steam-bg-color;
@@ -273,6 +281,7 @@ $pivot-3-y: $steam-canvas-size * .33;
 	position: relative;
 	border-radius: $steam-pivot-size-base;
 	margin: 0 auto;
+	animation: fade-in 1s ease-in;
 
 	&-bar {
 		background-color: $steam-color;

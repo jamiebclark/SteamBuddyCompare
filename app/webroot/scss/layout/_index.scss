@@ -111,6 +111,12 @@ $cell-padding-horizontal: $padding-base-horizontal;
 	.input-list {
 		width: 90%;
 	}
+	.input-friend {
+		color: #CCC;
+		&-active {
+			color: $input-color;
+		}
+	}
 	.search {
 		width: 10%;
 		button {
@@ -129,12 +135,16 @@ $cell-padding-horizontal: $padding-base-horizontal;
 		font-weight: normal;
 		border-radius: 4px;
 		margin-right: 5px;
+		.fa-bookmark {
+			margin-right: 5px;
+		}
 		&-add, &-delete {
 			display: inline-block;
 		}
 		&-delete {
 			margin-left: 5px;
 			font-size: $font-size-base;
+			color: $input-color;
 		}
 	}
 }
