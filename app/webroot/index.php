@@ -36,6 +36,7 @@ $baseUrl = sprintf(
 if (substr($baseUrl, -1) != '/') {
 	$baseUrl .= '/';
 }
+list($baseUrl, $query) = explode('?', $baseUrl) + [null, null];
 
 $defaultSteamIds = "";
 if (!empty($_GET['ids'])) {
