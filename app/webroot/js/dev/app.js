@@ -77,6 +77,7 @@ var SteamBuddyCompare = function (_Component) {
 			} else {
 				_this.state.steamIds = props.steamIds;
 			}
+			_this.state.idCount = _this.state.steamIds.length;
 		}
 		return _this;
 	}
@@ -162,9 +163,12 @@ var SteamBuddyCompare = function (_Component) {
 	}, {
 		key: "handleInputChange",
 		value: function handleInputChange(i, e) {
-			var steamIds = this.state.steamIds;
-			steamIds[i] = e.target.value;
-			this.setState({ steamIds: steamIds });
+			var steamIds = this.state.steamIds,
+			    val = e.target.value.replace(/[^0-9]/, '');
+			if (val != "") {
+				steamIds[i] = val;
+				this.setState({ steamIds: steamIds });
+			}
 		}
 	}, {
 		key: "handleSubmit",

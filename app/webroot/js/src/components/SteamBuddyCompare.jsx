@@ -20,6 +20,7 @@ export default class SteamBuddyCompare extends Component {
 			} else {
 				this.state.steamIds = props.steamIds;
 			}
+			this.state.idCount = this.state.steamIds.length;
 		}
 	}
 
@@ -102,9 +103,12 @@ export default class SteamBuddyCompare extends Component {
 	}
 
 	handleInputChange(i, e) {
-		let steamIds = this.state.steamIds;
-		steamIds[i] = e.target.value;
-		this.setState({steamIds: steamIds});
+		let steamIds = this.state.steamIds,
+			val = e.target.value.replace(/[^0-9]/, '');
+		if (val != "") {
+			steamIds[i] = val;
+			this.setState({steamIds: steamIds});
+		}
 	}
 
 	handleSubmit(e) {

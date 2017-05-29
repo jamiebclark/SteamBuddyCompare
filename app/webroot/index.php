@@ -37,6 +37,22 @@ if (substr($baseUrl, -1) != '/') {
 	$baseUrl .= '/';
 }
 
+$defaultSteamIds = "";
+if (!empty($_GET['ids'])) {
+	$ids = $_GET['ids'];
+	if (!is_array($ids)) {
+		$ids = [$ids];
+	}
+	foreach ($ids as $id) {
+		if (is_numeric($id)) {
+			$defaultSteamIds .= $id . ',';
+		}
+	}
+}
+if (empty($defaultSteamIds) && defined('DEFAULT_STEAM_IDS')) {
+	$defaultSteamIds = DEFAULT_STEAM_IDS;
+}
+
 ?>
 <html>
 	<head>
@@ -44,7 +60,7 @@ if (substr($baseUrl, -1) != '/') {
 		<link rel="stylesheet" href="css/style.css" />
 	</head>
 	<body>
-		<div id="root" data-base="<?= $baseUrl ?>" data-steamids="<?= DEFAULT_STEAM_IDS ?>"></div>
+		<div id="root" data-base="<?= $baseUrl ?>" data-steamids="<?= $defaultSteamIds ?>"></div>
 		<script type="text/javascript" src="js/dev/app.js" ></script>
 	<body>
 </body>
