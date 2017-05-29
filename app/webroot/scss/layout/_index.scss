@@ -1,9 +1,120 @@
 
+$cell-padding-vertical: $padding-base-vertical;
+$cell-padding-horizontal: $padding-base-horizontal;
+
+
+.SteamBuddyCompare {
+	> header, &-results {
+		padding: $padding-base-vertical $padding-base-horizontal;
+	}
+	> header {
+		background-color: rgba(0,0,0,.5);
+		> h1 {
+			font-size: $font-size-large;
+			margin-bottom: $line-height-computed / 2;
+			color: $blue-light;
+		}
+	}
+	&-results {
+		&-content {
+			display: flex;
+			flex-wrap: wrap;
+			&-games, &-filters {
+				vertical-align: top;
+				width: 100%;
+				padding: $padding-base-vertical $padding-base-horizontal;
+				box-sizing: border-box;
+			}
+			&-filters {
+				order: 1;
+			}
+			&-games{
+				order: 2;
+				border-collapse: collapse;
+				td, th {
+					padding: $cell-padding-vertical $cell-padding-horizontal;
+				}
+				th {
+					border-bottom: 2px solid $blue-border;
+				}
+				td {
+					background-color: rgba(0,0,0,.1);
+				}
+				tr:nth-child(even) {
+					td {
+						background-color: rgba(0,0,0,.4);
+					}
+				}
+			}
+		}
+	}
+}
+
+.game-link {
+	display: block;
+	overflow: hidden;
+	margin: #{-$cell-padding-vertical} #{-$cell-padding-horizontal};
+	padding: $cell-padding-vertical $cell-padding-horizontal;
+	
+	> img {
+		height: $line-height-computed * 2;
+		float: left;
+		margin-right: $padding-base-horizontal;
+	}
+}
+
+.cellmatch {
+	text-align: center;
+	font-weight: bold;
+	color: #FFF;
+	display: block;
+	padding: $padding-small-vertical $padding-small-horizontal;
+	border-radius: 4px;
+	font-size: $font-size-small;
+	&-yes {
+		background-color: rgba($color-success, .5);
+	}
+	&-no {
+		background-color: rgba($color-fail, .5);
+	}
+}
+
+
+@media (min-width: $screen-md-min) {
+	.SteamBuddyCompare {
+		&-results {
+			&-content {
+				&-filters {
+					order: 2;
+					width: 25%;
+				}
+				&-games {
+					order: 1;
+					width: 75%;
+					flex-grow: 1;
+				}
+			}
+		}
+	}
+}
 
 .id-search-form {
 	display: flex;
+	header {
+		margin-right: $padding-base-horizontal;
+		font-weight: normal;
+		text-align: right;
+		> h2 {
+			font-size: $font-size-large;
+		}
+	}
 	.input-list {
 		width: 90%;
+		input {
+			font-size: $font-size-small;
+			font-family: Courier, fixed;
+			padding: 10px;
+		}
 	}
 	.search {
 		width: 10%;

@@ -1,5 +1,6 @@
 @import "steambuddy";
 @import "taglist";
+@import "steamloader";
 
 .content-box {
 	margin: 0 auto $line-height-computed auto;
@@ -10,4 +11,5 @@
 	border-radius: $line-height-computed;
 	min-height: $line-height-computed * 15;
 	max-width: $screen-md-min;
+	line-height: $line-height-computed * 1.5;
 }

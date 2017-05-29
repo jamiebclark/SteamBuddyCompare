@@ -1,4 +1,5 @@
 import React, {Component} from "react";
+import TagList from "./TagList.jsx";
 import fetch from "node-fetch";
 import classNames from "classnames";
 
@@ -136,6 +137,9 @@ export default class SteamBuddyCompare extends Component {
 		>+</button>);
 
 		return <form className="id-search-form" onSubmit={this.handleSubmit.bind(this)} >
+			<header>
+				<h2>Steam IDs:</h2>
+			</header>
 			<div className="input-list">
 				{inputs}
 			</div>
@@ -251,14 +255,24 @@ export default class SteamBuddyCompare extends Component {
 
 	renderLoading() {
 		return <div className="SteamBuddyCompare-loading content-box">
-			<h2>Loading</h2>
+			<div className="steam">
+				<div className="steam-bar steam-bar-short">
+					<div className="steam-pivot steam-pivot-lg steam-pivot-3"></div>
+					<div className="steam-pivot steam-pivot-2"></div>
+					<div className="steam-bar steam-bar-long">
+						<div className="steam-pivot steam-pivot-1"></div>
+					</div>
+				</div>
+				<div className="steam-text">LOADING</div>
+			</div>
 		</div>
 	}
 
 	renderInitial() {
 		return <div className="SteamBuddyCompare-welcome content-box">
 			<h1>Steam Buddy Compare</h1>
-			<p>Find your friend's Steam ID's, enter them in the form below, and search</p>
+			<p><em>Steam Buddy Compare</em> is a way to view your game inventory compared to your friends' lists and find out what games you have in common. You can further filter that list to only find specific kinds of games based on Genre or Category</p>
+			<p>In order to use the search function, you need to first find your Steam IDs. If you need help finding your ID, <a href="http://steamid.co/" target="_blank">use this website as a resource</a>.</p>
 		</div>
 	}
 
@@ -273,9 +287,12 @@ export default class SteamBuddyCompare extends Component {
 		}
 
 		return <div className="SteamBuddyCompare">
-			<div className="SteamBuddyCompare-form">
-				{this.renderForm()}
-			</div>
+			<header>
+				<h1>Steam Buddy Compare</h1>
+				<div className="SteamBuddyCompare-form">
+					{this.renderForm()}
+				</div>
+			</header>
 			<div className="SteamBuddyCompare-results">
 				{body}
 			</div>
@@ -283,104 +300,3 @@ export default class SteamBuddyCompare extends Component {
 	}	
 }
 
-class TagList extends Component {
-	constructor() {
-		super(...arguments);
-		this.state = {
-			options: []
-		};
-	}
-
-	static get defaultProps() {
-		return {
-			name: "",
-			options: [],
-			showOptions: [],
-			hideOptions: [],
-			onClick: function() {},
-			label: ""
-		}
-	}
-
-	handleClick(val, activeValue) {
-		this.props.onClick(this.props.name, val, activeValue);
-	}
-
-	render() {
-		let optionList = [];
-		for (let i in this.props.options) {
-			let status = 0;
-			if (this.props.showOptions.indexOf(this.props.options[i].value) > -1) {
-				status = 1;
-			} else if (this.props.hideOptions.indexOf(this.props.options[i].value) > -1) {
-				status = 2;
-			}
-
-			optionList.push(<TagListItem
-				key={i}
-				status={status}
-				{...this.props.options[i]}
-				onClick={this.handleClick.bind(this)}
-			/>);
-		}
-		return <div>
-			<h6>{this.props.label}</h6>
-			<div>{optionList}</div>
-		</div>
-	}
-}
-
-class TagListItem extends Component {
-	constructor(props) {
-		super(...arguments);
-		this.state = {status: props.status};
-	}
-	static get defaultProps() {
-		return {
-			name: "",
-			value: "",
-			status: 0,	// 0: Neutral, 1: Match, 2: Not Match
-			onClick: function() {}
-		}
-	}
-
-	handleClick(e) {
-		e.preventDefault();
-		let status = this.getNextStatusValue(this.state.status);
-		this.setState({status: status}, () => {
-			this.props.onClick(this.props.value, status);
-		});
-	}
-
-	getNextStatusValue(currentValue) {
-		if (isNaN(currentValue)) {
-			currentValue = 0;
-		}
-		let newVal = parseInt(currentValue) + 1;
-		if (newVal > 2) {
-			newVal = 0;
-		}
-		return newVal;
-	}
-
-	render() {
-		let className = classNames("TagListItem",
-				{"TagListItem-match": this.state.status === 1},
-				{"TagListItem-hide": this.state.status === 2}
-			),
-			title = "No filter";
-
-		if (this.state.status === 1) {
-			title = "Include any games with " + this.props.name;
-		} else if (this.state.status === 2) {
-			title = "Hide any games with " + this.props.name;
-		}
-
-		return <a 
-			className={className}
-			href="#" 
-			onClick={this.handleClick.bind(this)}
-			title={title}
-		>{this.props.name}</a>;
-	}
-}

@@ -1,0 +1,379 @@
+/***
+ * Math Functions
+ **/
+@function pi() {
+	@return 3.14159265359;
+}
+@function sqrt($r) {
+	$x0: 1;
+	$x1: $x0;
+ 
+	@for $i from 1 through 10 {
+		$x1: $x0 - ($x0 * $x0 - abs($r)) / (2 * $x0);
+		$x0: $x1;
+	}
+ 
+	@return $x1;
+}
+@function fact($number) {
+	$value: 1;
+	@if $number > 0 {
+		@for $i from 1 through $number {
+			$value: $value * $i;
+		}
+	}
+	@return $value;
+}
+@function pow($number, $exp) {
+	$value: 1;
+	@if $exp > 0 {
+		@for $i from 1 through $exp {
+			$value: $value * $number;
+		}
+	}
+	@else if $exp < 0 {
+		@for $i from 1 through -$exp {
+			$value: $value / $number;
+		}
+	}
+	@return $value;
+}
+@function rad($angle) {
+	$unit: unit($angle);
+	$unitless: $angle / ($angle * 0 + 1);
+	// If the angle has 'deg' as unit, convert to radians.
+	@if $unit == deg {
+		$unitless: $unitless / 180 * pi();
+	}
+	@return $unitless;
+}
+
+@function deg($rad) {
+	@if type-of($rad) == "string" {
+		@warn "Bad Radian value for deg(): #{$rad}";
+		@return 0;
+	}
+	$uniteless: $rad / ($rad * 0 + 1);
+	@return #{$uniteless * 180 / pi()}deg;
+}
+
+
+@function sin($angle) {
+	$sin: 0;
+	// Iterate a bunch of times.
+	@for $i from 0 through 10 {
+		$sin: $sin + pow(-1, $i) * pow($angle, (2 * $i + 1)) / fact(2 * $i + 1);
+	}
+	@return $sin;
+}
+
+@function cos($angle) {
+	$cos: 0;
+	// Iterate a bunch of times.
+	@for $i from 0 through 10 {
+		$cos: $cos + pow(-1, $i) * pow($angle, 2 * $i) / fact(2 * $i);
+	}
+	@return $cos;
+}
+
+@function tan($angle) {
+	@return sin($angle) / cos($angle);
+}
+
+
+$default-threshold: pi()/180/20;
+
+@function convert-angle($value, $unit-name) {
+	$factors: (
+		rad: 1rad,
+		deg: 180/pi(),
+		grad: 200grad/pi(),
+		turn: .5turn/pi()
+	);
+
+	@if not unitless($value) {
+		@warn '`#{$value}` should be unitless';
+		@return false;
+	}
+
+	@if not map-has-key($factors, $unit-name) {
+		@warn 'unit `#{$unit-name}` is not a valid unit - please make sure it is either `deg`, `rad`, `grad` or `turn`';
+		@return false;
+	}
+
+	@return $value*map-get($factors, $unit-name);
+}
+
+@function asin($z, $unit-name: deg, $threshold: $default-threshold) {
+	$sum: 0;
+	$complement: false;
+	$sign: if($z != 0, $z/abs($z), 1);
+	$z: abs($z);
+	
+	@if $z > 1 and $z != 1 {
+		@warn 'illegal `#{$z}` value for function';
+		@return false;
+	}
+
+	@if $z > sin(pi()/4) {
+		$complement: true;
+		$z: sqrt(1 - pow($z, 2));
+	}
+
+	$term: $z;
+	$i: 0;
+	$k: 1;
+
+	@while $term > $threshold {
+		$sum: $sum + $term;
+
+		$i: $i + 1;
+		$k: $k*(2*$i - 1)/(2*$i);
+		$j: 2*$i + 1;
+
+		$term: $k*pow($z, $j)/$j;
+	}
+
+	@return convert-angle($sign*(if($complement, pi()/2 - $sum, $sum)), $unit-name);
+}
+
+@function acos($z, $unit-name: deg, $threshold: $default-threshold) {
+	@return convert-angle(pi()/2, $unit-name) - asin($z, $unit-name, $threshold);
+}
+
+@function atan($z, $unit-name: deg, $threshold: $default-threshold) {  
+	@return asin($z/sqrt(1 + pow($z, 2)), $unit-name, $threshold);
+}
+
+/**
+ * User-Defined Variables
+ **/
+$steam-canvas-size: 400px;
+$steam-color: #FFF;
+$steam-bg-color: #000;
+$steam-animation-time: 4s;
+
+/**
+ * Preset variables
+ **/
+$animation-frames: 100;
+
+$steam-pivot-size-base: $steam-canvas-size * .1;
+$steam-pivot-black-border: $steam-pivot-size-base * .2;
+$steam-pivot-white-border-base: $steam-pivot-black-border;
+$steam-pivot-white-border-large: $steam-pivot-black-border * 2;
+
+$steam-bar-short-width: $steam-canvas-size * .25;
+$steam-bar-short-height: $steam-pivot-size-base * .9;
+$steam-bar-short-side-angle: 10deg;
+$steam-bar-short-side-y: tan(rad($steam-bar-short-side-angle)) * $steam-bar-short-width / 2;
+$steam-bar-short-angle: -45deg;
+
+$steam-bar-long-width: $steam-bar-short-width * 2;
+$steam-bar-long-height: $steam-bar-short-height;
+$steam-bar-long-angle: 65deg;
+
+$steam-pivot-outer-radius-base: $steam-pivot-size-base + 2 * $steam-pivot-black-border + $steam-pivot-white-border-base * 2;
+$steam-pivot-outer-radius-large: $steam-pivot-size-base + 2 * $steam-pivot-black-border + $steam-pivot-white-border-large * 2;
+
+$pivot-1-x: $steam-canvas-size * .2;
+$pivot-1-y: $steam-canvas-size * .33;
+$pivot-2-x: $steam-canvas-size * .6;
+$pivot-2-y: $steam-canvas-size * .5;
+$pivot-3-x: $steam-canvas-size * .8;
+$pivot-3-y: $steam-canvas-size * .33;
+
+@mixin pivot($radius, $border-width) {
+	$outer-radius: $radius + 2 * $border-width;
+	content: " ";
+	background-color: $steam-color;
+	width: $radius;
+	height: $radius;
+	border-radius: $radius;
+	top: -$outer-radius / 2;
+	left: -$outer-radius / 2;
+	position: absolute;
+}
+
+@mixin rotate-long-arm($short-arm-angle) {
+	$o-angle: $short-arm-angle;
+	$return-angle: $short-arm-angle;
+	$short-arm-angle: rad($short-arm-angle);
+	$v: sin($short-arm-angle) * $steam-bar-short-width;
+	$a: acos($v / $steam-bar-long-width, rad);
+
+	$horiz: "";
+	$vert: "";
+
+	@if ($short-arm-angle >= 0 and $short-arm-angle <= (pi() / 2 )) {
+		$horiz: "left";
+		$vert: "top";
+	} @else if ($short-arm-angle > (pi() / 2) and $short-arm-angle <= pi()) {
+		$horiz: "right";
+		$vert: "top";
+	} @else if ($short-arm-angle > pi() and $short-arm-angle <= (3 * pi() / 2)) {
+		$horiz: "right";	
+		$vert: "bottom";
+	} @else if ($short-arm-angle > (3 * pi() / 2) and $short-arm-angle <= 2 * pi()) {
+		$horiz: "left";
+		$vert: "bottom";
+	} 
+
+	@if $horiz == "left" {
+		$a: $a + acos($v / $steam-bar-short-width, rad);
+	} @else if $horiz == "right" {
+		$a: $a - acos($v / $steam-bar-short-width, rad);
+	}
+	@if $vert == "top" {
+		$a: $a + pi();
+	} @else if $vert == "bottom" {
+		$a: $a - pi();
+		@if $horiz == "right" {
+			$a: $a + 2 * pi();
+		}
+	}
+	$return-angle: deg($a);
+	transform: rotate($return-angle);
+}
+
+@mixin place-pivot($x, $y, $radius, $outer-radius) {
+	position: absolute;
+	top: $y - $radius / 2;
+	left: $x - $radius / 2;
+	z-index: 1;
+	&:after {
+		position: absolute;
+		z-index: -1;
+	}
+}
+
+@keyframes rotate-short-bar {
+	@for $i from 0 through $animation-frames {
+		#{$i / $animation-frames * 100}% {
+			transform: rotate(#{$i / $animation-frames * 360}deg);
+		}
+	}
+}
+
+@keyframes rotate-long-bar {
+	@for $i from 0 through $animation-frames {
+		#{$i / $animation-frames * 100}% {
+			$v: $i / $animation-frames * 360 * 1deg;
+			@include rotate-long-arm($v);
+		}
+	}
+}
+
+
+.steam {
+	background-color: $steam-bg-color;
+	overflow: hidden;
+	width: $steam-canvas-size;
+	height: $steam-canvas-size;
+	position: relative;
+	border-radius: $steam-pivot-size-base;
+	margin: 0 auto;
+
+	&-bar {
+		background-color: $steam-color;
+		position: absolute;
+		border: 0;
+	}
+	&-bar-long {
+		z-index: 2;
+		width: $steam-bar-long-width;
+		height: $steam-bar-long-height;
+		left: -$steam-bar-long-width - $steam-pivot-size-base / 2;
+		top: 0;
+		transform-origin: #{$steam-bar-long-width + 3px} #{$steam-bar-long-height / 2};
+		transform: rotate($steam-bar-long-angle);
+		animation: rotate-long-bar $steam-animation-time infinite linear;
+		&:after {
+			position: absolute;
+			content: " ";
+			width: $steam-bar-long-width;
+			height: $steam-bar-long-height;
+			background-color: $steam-color;
+		}
+		&:before {
+			position: absolute;
+			content: " ";
+			height: $steam-bar-long-height;
+			width: $steam-pivot-size-base;
+			right: -$steam-pivot-size-base / 2;
+			border-radius: $steam-pivot-size-base;
+			background-color: $steam-color;
+		}
+	}
+	&-bar-short {
+		width: $steam-bar-short-width;
+		height: $steam-bar-short-height;
+		left: $pivot-3-x - $steam-bar-short-width;
+		top: $pivot-3-y - $steam-bar-short-height / 2;
+		transform-origin: right center;
+		transform: rotate($steam-bar-short-angle);
+		animation: rotate-short-bar $steam-animation-time infinite linear;
+		&:before, &:after {
+			position: absolute;
+			content: " ";
+			width: $steam-bar-short-width;
+			height: $steam-bar-short-height;
+			background-color: $steam-color;
+		}
+		&:before {
+			top: -$steam-bar-short-side-y;
+			transform: rotate(-$steam-bar-short-side-angle);
+		}
+		&:after {
+			top: $steam-bar-short-side-y;
+			transform: rotate($steam-bar-short-side-angle);
+		}
+	}
+	&-pivot {
+		left: -$steam-bar-short-width / 2 + $steam-pivot-outer-radius-base / 2;
+		top: $steam-bar-short-height /2;
+		position: absolute;
+		z-index: 2;
+
+		&:before {
+			@include pivot($steam-pivot-size-base, $steam-pivot-black-border);
+			border: $steam-pivot-black-border solid $steam-bg-color;
+			z-index: 2;
+		}
+		&:after {
+			@include pivot($steam-pivot-outer-radius-base, 0);
+			z-index: 1;
+		}
+		&-lg {
+			&:after {
+				@include pivot($steam-pivot-outer-radius-large, 0);
+			}
+		}
+		&-1 {
+			z-index: -1;
+			left: 0;
+		}
+		&-2 {
+			z-index: 1;
+		}
+		&-3 {
+			left: $steam-bar-short-width;
+		}
+	}
+
+	&-text {
+		position: absolute;
+		top: 75%;
+		left: 0;
+		right: 0;
+		text-align: center;
+		color: $steam-color;
+		font-family: Helvetica, sans-serif;
+		font-weight: bold;
+		font-size: $steam-pivot-outer-radius-base;
+		text-transform: uppercase;
+		letter-spacing: .2em;
+		transform: scaleX(.85);
+	}
+}
+
